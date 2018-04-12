@@ -26,18 +26,20 @@ batch_size = 128
 num_classes = 10
 epochs = 20
 
-#shuffle inputs
-def shuffle_inputs():
-    order = np.random.permutation(list(range(0, 784)))
-    for i in range(0, len(x_train)):
-        x_train[i] = x_train[i][order]
-
-    for i in range(0, len(x_test)):
-        x_test[i] = x_test[i][order]
-
 # the data, split between train and test sets
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
-shuffle_inputs()
+
+#shuffle inputs
+def shuffle_inputs(x, o):
+    x = x.reshape(len(x), 784)
+    for i in range(0, len(x)):
+        x[i] = x[i][o]
+    x = x.reshape(len(x), 28, 28)
+    return x
+
+order = np.random.permutation(list(range(0, 784)))
+x_train = shuffle_inputs(x_train, order)
+x_test = shuffle_inputs(x_test, order)
 
 x_train = x_train.reshape(60000, 784)
 x_test = x_test.reshape(10000, 784)
@@ -73,7 +75,7 @@ def create_mlp():
     return model
 
 def evaluate(model):
-    predictions = model.predict_classes(x_test, verbose=1)
+    predictions = model.predict_classes(x_test, verbose=0)
     y_test_classes = np.array(list(map(np.argmax, y_test)))
     
     cm = confusion_matrix(y_test_classes, predictions)
@@ -84,9 +86,13 @@ def evaluate(model):
 
 
 mlp = create_mlp()
+print('Generating CM...')
 res = np.array([evaluate(mlp) for i in range(0, 100)])
 
 print(res.mean(axis=0))
 #Shows non controllable randomness
 print(res.std(axis=0))
 
+score = mlp.evaluate(x_test, y_test, verbose=0)
+print('Test loss:', score[0])
+print('Test accuracy:', score[1])

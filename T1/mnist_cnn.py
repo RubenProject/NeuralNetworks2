@@ -13,6 +13,7 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten
 from keras.layers import Conv2D, MaxPooling2D
 from keras import backend as K
+import numpy as np
 
 #Safeguard
 if os.environ['CUDA_VISIBLE_DEVICES'] == '':
@@ -28,6 +29,18 @@ img_rows, img_cols = 28, 28
 
 # the data, split between train and test sets
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
+
+#shuffle inputs
+def shuffle_inputs(x, o):
+    x = x.reshape(len(x), 784)
+    for i in range(0, len(x)):
+        x[i] = x[i][o]
+    x = x.reshape(len(x), 28, 28)
+    return x
+
+order = np.random.permutation(list(range(0, 784)))
+x_train = shuffle_inputs(x_train, order)
+x_test = shuffle_inputs(x_test, order)
 
 if K.image_data_format() == 'channels_first':
     x_train = x_train.reshape(x_train.shape[0], 1, img_rows, img_cols)
@@ -75,7 +88,7 @@ def create_cnn():
     return model
 
 def evaluate(model):
-    predictions = model.predict_classes(x_test, verbose=1, shuffle=0)
+    predictions = model.predict_classes(x_test, verbose=0)
     y_test_classes = np.array(list(map(np.argmax, y_test)))
 
     cm = confusion_matrix(y_test_classes, predictions)
@@ -84,7 +97,12 @@ def evaluate(model):
     return cm
 
 cnn = create_cnn()
+print('Generating CM...')
 res = np.array([evaluate(cnn) for i in range(0, 100)])
 
 print(res.mean(axis=0))
-print res.std(axis=0))
+print(res.std(axis=0))
+
+score = cnn.evaluate(x_test, y_test, verbose=0)
+print('Test loss:', score[0])
+print('Test accuracy:', score[1])
