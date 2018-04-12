@@ -21,9 +21,15 @@ import numpy as np
 import random
 import sys
 import io
+import os
 
-path = get_file('nietzsche.txt', origin='https://s3.amazonaws.com/text-datasets/nietzsche.txt')
-with io.open(path, encoding='utf-8') as f:
+#Safeguard
+if os.environ['CUDA_VISIBLE_DEVICES'] == '':
+    print('Specify which GPUs are visible!!')
+    exit()
+
+#path = get_file('nietzsche.txt', origin='https://s3.amazonaws.com/text-datasets/nietzsche.txt')
+with io.open('El-viejo-y-el-mar.txt', encoding='utf-8') as f:
     text = f.read().lower()
 print('corpus length:', len(text))
 

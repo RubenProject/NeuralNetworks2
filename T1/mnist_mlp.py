@@ -26,8 +26,18 @@ batch_size = 128
 num_classes = 10
 epochs = 20
 
+#shuffle inputs
+def shuffle_inputs():
+    order = np.random.permutation(list(range(0, 784)))
+    for i in range(0, len(x_train)):
+        x_train[i] = x_train[i][order]
+
+    for i in range(0, len(x_test)):
+        x_test[i] = x_test[i][order]
+
 # the data, split between train and test sets
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
+shuffle_inputs()
 
 x_train = x_train.reshape(60000, 784)
 x_test = x_test.reshape(10000, 784)
@@ -41,15 +51,6 @@ print(x_test.shape[0], 'test samples')
 # convert class vectors to binary class matrices
 y_train = keras.utils.to_categorical(y_train, num_classes)
 y_test = keras.utils.to_categorical(y_test, num_classes)
-
-#shuffle inputs
-def shuffle_inputs():
-    order = np.random.permutation(list(range(0, 784)))
-    for i in range(0, len(x_train)):
-        x_train[i] = x_train[i][order]
-
-    for i in range(0, len(x_test)):
-        x_test[i] = x_test[i][order]
 
 
 def create_mlp():
@@ -82,7 +83,6 @@ def evaluate(model):
 
 
 
-shuffle_inputs()
 mlp = create_mlp()
 res = np.array([evaluate(mlp) for i in range(0, 100)])
 
