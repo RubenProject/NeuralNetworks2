@@ -59,7 +59,7 @@ epochs = 100  # Number of epochs to train for.
 latent_dim = 256  # Latent dimensionality of the encoding space.
 num_samples = 10000  # Number of samples to train on.
 # Path to the data txt file on disk.
-data_path = 'kor.txt'
+data_path = 'spa.txt'
 
 # Vectorize the data.
 input_texts = []
@@ -150,7 +150,7 @@ model.fit([encoder_input_data, decoder_input_data], decoder_target_data,
           epochs=epochs,
           validation_split=0.2)
 # Save model
-model.save('s2s.h5')
+model.save('eng-spa.h5')
 
 # Next: inference mode (sampling).
 # Here's the drill:

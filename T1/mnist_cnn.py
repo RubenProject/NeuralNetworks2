@@ -14,6 +14,8 @@ from keras.layers import Dense, Dropout, Flatten
 from keras.layers import Conv2D, MaxPooling2D
 from keras import backend as K
 import numpy as np
+from sklearn.metrics import confusion_matrix
+import itertools
 
 #Safeguard
 if os.environ['CUDA_VISIBLE_DEVICES'] == '':
@@ -87,7 +89,7 @@ def create_cnn():
           validation_data=(x_test, y_test))
     return model
 
-def evaluate(model):
+def test(model):
     predictions = model.predict_classes(x_test, verbose=0)
     y_test_classes = np.array(list(map(np.argmax, y_test)))
 
@@ -96,13 +98,22 @@ def evaluate(model):
 
     return cm
 
-cnn = create_cnn()
+test_acc = 0
+train_acc = 0
+for i in range(0, 10):
+    cnn = create_cnn()
+    score = cnn.evaluate(x_train, y_train, verbose=0)
+    train_acc += score[1]
+    score = cnn.evaluate(x_test, y_test, verbose=0)
+    test_acc += score[1]
+
+print('Train accuracy:', train_acc/10)
+print('Test accuracy:', test_acc/10)
+
+
 print('Generating CM...')
-res = np.array([evaluate(cnn) for i in range(0, 100)])
+res = np.array([test(cnn) for i in range(0, 100)])
 
 print(res.mean(axis=0))
-print(res.std(axis=0))
+print(np.max(res.std(axis=0)))
 
-score = cnn.evaluate(x_test, y_test, verbose=0)
-print('Test loss:', score[0])
-print('Test accuracy:', score[1])

@@ -63,7 +63,7 @@ def create_mlp():
     model.add(Dropout(0.2))
     model.add(Dense(num_classes, activation='softmax'))
 
-    model.compile(loss='categorical_crossentropy',
+    model.compile(loss=keras.losses.categorical_crossentropy,
         optimizer=RMSprop(),
         metrics=['accuracy'])
 
@@ -85,14 +85,21 @@ def evaluate(model):
 
 
 
-mlp = create_mlp()
+train_acc = 0
+test_acc = 0
+for i in range(0, 10):
+    mlp = create_mlp()
+    score = mlp.evaluate(x_train, y_train, verbose=0)
+    train_acc += score[1]
+    score = mlp.evaluate(x_test, y_test, verbose=0)
+    train_acc += score[1]
+    
+print('Train accuracy:', train_acc/10)
+print('Test accuracy:', test_acc/10)
+
 print('Generating CM...')
 res = np.array([evaluate(mlp) for i in range(0, 100)])
 
 print(res.mean(axis=0))
 #Shows non controllable randomness
-print(res.std(axis=0))
-
-score = mlp.evaluate(x_test, y_test, verbose=0)
-print('Test loss:', score[0])
-print('Test accuracy:', score[1])
+print(np.max(res.std(axis=0)))

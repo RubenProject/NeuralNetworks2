@@ -16,7 +16,6 @@ from keras.models import Sequential
 from keras.layers import Dense, Activation
 from keras.layers import LSTM
 from keras.optimizers import RMSprop
-from keras.utils.data_utils import get_file
 import numpy as np
 import random
 import sys
@@ -28,7 +27,6 @@ if os.environ['CUDA_VISIBLE_DEVICES'] == '':
     print('Specify which GPUs are visible!!')
     exit()
 
-#path = get_file('nietzsche.txt', origin='https://s3.amazonaws.com/text-datasets/nietzsche.txt')
 with io.open('El-viejo-y-el-mar.txt', encoding='utf-8') as f:
     text = f.read().lower()
 print('corpus length:', len(text))
@@ -115,3 +113,4 @@ model.fit(x, y,
           batch_size=128,
           epochs=60,
           callbacks=[print_callback])
+model.save('el-viejo.h5')

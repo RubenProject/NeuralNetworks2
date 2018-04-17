@@ -34,37 +34,36 @@ from six.moves import range
 
 
 class CharacterTable(object):
-    """Given a set of characters:
-    + Encode them to a one hot integer representation
-    + Decode the one hot integer representation to their character output
-    + Decode a vector of probabilities to their character output
-    """
-    def __init__(self, chars):
-        """Initialize character table.
+    def digit_vector(c):
+        if c == '+':
+            return [0, 0, 0, 0, 0, 1]
+        elif c == ' ':
+            return [0, 0, 0, 0, 1, 0]
+        return [int(x) for x in bin (int(c))[2:]] + [0, 0]
 
-        # Arguments
-            chars: Characters that can appear in the input.
-        """
-        self.chars = sorted(set(chars))
-        self.char_indices = dict((c, i) for i, c in enumerate(self.chars))
-        self.indices_char = dict((i, c) for i, c in enumerate(self.chars))
+    def vector_digit(x):
+        if x[4] == 1:
+            return ' '
+        elif x[5] == 1:
+            return '+'
+        y = 0
+        for i in range(4):
+            if x[i] == 1:
+                y += j<<i
+        return str(y)
+
 
     def encode(self, C, num_rows):
-        """One hot encode given string C.
-
-        # Arguments
-            num_rows: Number of rows in the returned one hot encoding. This is
-                used to keep the # of rows for each data the same.
-        """
-        x = np.zeros((num_rows, len(self.chars)))
+        x = np.zeros((num_rows, 6))
         for i, c in enumerate(C):
-            x[i, self.char_indices[c]] = 1
+            x[i] = self.digit_vector(c)
         return x
 
-    def decode(self, x, calc_argmax=True):
-        if calc_argmax:
-            x = x.argmax(axis=-1)
-        return ''.join(self.indices_char[x] for x in x)
+    def decode(self, X):
+        d = ''
+        for x in X:
+            d += self.vector_digit(x)
+        return d
 
 
 class colors:
@@ -81,9 +80,7 @@ REVERSE = True
 # int is DIGITS.
 MAXLEN = DIGITS + 1 + DIGITS
 
-# All the numbers, plus sign and space for padding.
-chars = '0123456789+ '
-ctable = CharacterTable(chars)
+ctable = CharacterTable()
 
 questions = []
 expected = []
@@ -149,6 +146,13 @@ LAYERS = 1
 
 print('Build model...')
 model = Sequential()
+
+model.add(Dense(64, activation='relu', input_shape=(6,)))
+model.add(Dense(32, activation='relu'))
+model.add(Dense(12, activation='softmax'))
+
+
+
 # "Encode" the input sequence using an RNN, producing an output of HIDDEN_SIZE.
 # Note: In a situation where your input sequences have a variable length,
 # use input_shape=(None, num_feature).
@@ -167,7 +171,7 @@ for _ in range(LAYERS):
 
 # Apply a dense layer to the every temporal slice of an input. For each of step
 # of the output sequence, decide which character should be chosen.
-model.add(layers.TimeDistributed(layers.Dense(len(chars))))
+model.add(layers.TimeDistributed(layers.Dense(6)))
 model.add(layers.Activation('softmax'))
 model.compile(loss='categorical_crossentropy',
               optimizer='adam',
