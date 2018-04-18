@@ -11,7 +11,7 @@ if os.environ['CUDA_VISIBLE_DEVICES'] == '':
     exit()
 
 
-MAX_BIT = 32
+MAX_BIT = 30
 
 
 def encode(x):
@@ -44,7 +44,7 @@ def gen_data(N):
     return x, y
 
 
-def create_rnn(N=10000, epochs=40):
+def create_rnn(N=10000, epochs=20):
     model = Sequential()
     model.add(SimpleRNN(4, input_shape=(None, 2), return_sequences=True))
     model.add(Dense(4, activation='relu'))
@@ -83,6 +83,6 @@ def add_rnn(model, a, b):
 
 rnn = create_rnn()
 #rnn = load_model('bin_add.h5')
-rnn.save('bin_add_4.h5')
+#rnn.save('bin_add_4.h5')
 test_rnn(rnn)
 
